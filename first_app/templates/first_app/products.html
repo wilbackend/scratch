@@ -1,32 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products</title>
+    <style>
+        :root {
+            --bg-main: #edf3fa;
+            --bg-accent: #d9e6f7;
+            --panel: #ffffff;
+            --ink: #1f2937;
+            --muted: #5b6878;
+            --border: #d2dbe8;
+            --primary: #1e4fa8;
+            --primary-hover: #173f85;
+            --danger-bg: #fff1f1;
+            --danger-text: #9d2b2b;
+            --danger-border: #f2c1c1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, var(--bg-accent), transparent 45%),
+                radial-gradient(circle at 90% 5%, #e6f2ff, transparent 35%),
+                var(--bg-main);
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 1.8rem auto;
+            padding: 0 1rem 1.5rem;
+        }
+
+        .page-title {
+            margin: 0 0 0.4rem;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        .page-subtitle {
+            margin: 0 0 1rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(260px, 340px) 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 8px 24px rgba(34, 55, 92, 0.08);
+            animation: rise 240ms ease-out both;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            margin: 0 0 0.9rem;
+            font-size: 1.05rem;
+        }
+
+        form p {
+            margin: 0 0 0.85rem;
+        }
+
+        form label {
+            display: block;
+            margin: 0 0 0.35rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.48rem 0.55rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--ink);
+            background: #fbfdff;
+        }
+
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.3rem;
+            accent-color: var(--primary);
+        }
+
+        .btn-primary {
+            border: none;
+            border-radius: 8px;
+            padding: 0.55rem 0.8rem;
+            color: #ffffff;
+            background: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .product-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.72rem 0.75rem;
+            background: #fdfefe;
+        }
+
+        .product-name {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .product-price {
+            margin: 0.15rem 0 0;
+            color: var(--muted);
+            font-size: 0.93rem;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 0.35rem;
+            border-radius: 999px;
+            padding: 0.17rem 0.55rem;
+            background: #fbe8bf;
+            color: #7a5900;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .link-edit {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 0.35rem 0.52rem;
+            border: 1px solid transparent;
+        }
+
+        .link-edit:hover {
+            border-color: var(--border);
+            background: #f2f7ff;
+        }
+
+        .inline-form {
+            margin: 0;
+        }
+
+        .btn-delete {
+            border: 1px solid var(--danger-border);
+            border-radius: 8px;
+            padding: 0.4rem 0.62rem;
+            color: var(--danger-text);
+            background: var(--danger-bg);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: #ffe3e3;
+        }
+
+        .empty-state {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .product-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Products</h1>
+    <main class="container">
+        <h1 class="page-title">Product Manager</h1>
+        <p class="page-subtitle">Create, edit, and remove products from one page.</p>
 
-    <h2>Create Product</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
+        <div class="layout">
+            <section class="panel create-panel">
+                <h2>Create Product</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn-primary" type="submit">Save</button>
+                </form>
+            </section>
 
-    <h2>Product List</h2>
-    {% if products %}
-        <ul>
-            {% for product in products %}
-                <li>
-                    {{ product.name }} - ${{ product.price }}
-                    {% if not product.is_active %}(inactive){% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No products yet.</p>
-    {% endif %}
+            <section class="panel list-panel">
+                <h2>Product List</h2>
+                {% if products %}
+                <ul class="product-list">
+                    {% for product in products %}
+                    <li class="product-item">
+                        <div>
+                            <p class="product-name">{{ product.name }}</p>
+                            <p class="product-price">${{ product.price }}</p>
+                            {% if not product.is_active %}
+                            <span class="badge">Inactive</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="actions">
+                            <a class="link-edit" href="{% url 'first_app:product_edit' product.pk %}">Edit</a>
+
+                            <form class="inline-form" method="post"
+                                action="{% url 'first_app:product_delete' product.pk %}">
+                                {% csrf_token %}
+                                <button class="btn-delete" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="empty-state">No products yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
 </body>
+
 </html>
