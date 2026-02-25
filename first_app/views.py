@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
-from .models import Product
-from .forms import ProductForm
-from django.shortcuts import get_object_or_404, render, redirect
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from .forms import OrderCreateForm, OrderItemFormSet, ProductForm
+from .models import Order, OrderItem, Product
+
 
 def product_list_create(request):
     if request.method == "POST":
@@ -15,6 +16,50 @@ def product_list_create(request):
 
     products = Product.objects.all()
     return render(request, "first_app/products.html", {"form": form, "products": products})
+
+
+def order_list_create(request):
+    if request.method == "POST":
+        order_form = OrderCreateForm(request.POST, prefix="order")
+        item_formset = OrderItemFormSet(request.POST, prefix="items")
+
+        if order_form.is_valid() and item_formset.is_valid():
+            with transaction.atomic():
+                order = order_form.save()
+                for item_form in item_formset:
+                    if not item_form.cleaned_data:
+                        continue
+
+                    product = item_form.cleaned_data.get("product")
+                    quantity = item_form.cleaned_data.get("quantity")
+                    if not product or quantity in (None, ""):
+                        continue
+
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=quantity,
+                        unit_price=product.price,
+                    )
+            return redirect("first_app:orders")
+    else:
+        order_form = OrderCreateForm(prefix="order")
+        item_formset = OrderItemFormSet(prefix="items")
+
+    orders = (
+        Order.objects.select_related("customer")
+        .prefetch_related("items__product")
+        .order_by("-ordered_at", "-id")
+    )
+    return render(
+        request,
+        "first_app/orders.html",
+        {
+            "order_form": order_form,
+            "item_formset": item_formset,
+            "orders": orders,
+        },
+    )
 
 
 def product_update(request, pk):
@@ -33,6 +78,7 @@ def product_update(request, pk):
         "first_app/products.html",
         {"form": form, "products": products, "editing_product": product},
     )
+
 
 @require_POST
 def product_delete(request, pk):

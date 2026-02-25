@@ -230,14 +230,22 @@
     <main class="container">
         <h1 class="page-title">Product Manager</h1>
         <p class="page-subtitle">Create, edit, and remove products from one page.</p>
+        <p class="page-subtitle"><a href="{% url 'first_app:orders' %}">Go to orders</a></p>
 
         <div class="layout">
             <section class="panel create-panel">
-                <h2>Create Product</h2>
+                <h2>
+                    {% if editing_product %}Edit Product{% else %}Create Product{% endif %}
+                </h2>
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button class="btn-primary" type="submit">Save</button>
+                    <button class="btn-primary" type="submit">
+                        {% if editing_product %}Update{% else %}Save{% endif %}
+                    </button>
+                    {% if editing_product %}
+                    <a href="{% url 'first_app:products' %}">Cancel</a>
+                    {% endif %}
                 </form>
             </section>
 
