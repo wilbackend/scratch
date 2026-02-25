@@ -1,9 +1,9 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from .forms import OrderCreateForm, OrderItemFormSet, ProductForm
-from .models import Order, OrderItem, Product
-
+from .forms import OrderCreateForm, OrderItemFormSet, ProductForm, CustomerForm
+from .models import Order, OrderItem, Product, Customer
+from django.db.models.deletion import ProtectedError
 
 def product_list_create(request):
     if request.method == "POST":
@@ -85,3 +85,56 @@ def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     product.delete()
     return redirect("first_app:products")
+
+def customer_list_create(request):
+    if request.method == "POST":
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("first_app:customers")
+    else:
+        form = CustomerForm()
+
+    customers = Customer.objects.order_by("name")
+    return render(
+        request,
+        "first_app/customers.html",
+        {"form": form, "customers": customers},
+    )
+
+def customer_update(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+
+    if request.method == "POST":
+        form = CustomerForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            return redirect("first_app:customers")
+    else:
+        form = CustomerForm(instance=customer)
+
+    customers = Customer.objects.order_by("name")
+    return render(
+        request,
+        "first_app/customers.html",
+        {"form": form, "customers": customers, "editing_customer": customer},
+    )
+
+@require_POST
+def customer_delete(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    try:
+        customer.delete()
+        return redirect("first_app:customers")
+    except ProtectedError:
+        form = CustomerForm()
+        customers = Customer.objects.order_by("name")
+        return render(
+            request,
+            "first_app/customers.html",
+            {
+                "form": form,
+                "customers": customers,
+                "delete_error": "Cannot delete this customer because it already has orders.",
+            },
+        )

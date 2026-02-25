@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Order
+from .models import Product, Order, Customer
 from django.forms import BaseFormSet, formset_factory
 
 
@@ -55,3 +55,7 @@ OrderItemFormSet = formset_factory(
     formset=BaseOrderItemInputFormSet,
     extra=3,
 )
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ["name", "email"]
