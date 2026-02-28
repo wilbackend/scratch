@@ -104,3 +104,59 @@ class OrderCreateFlowTest(TestCase):
         self.assertContains(response, "Each product can appear only once per order.")
         self.assertEqual(Order.objects.count(), 0)
         self.assertEqual(OrderItem.objects.count(), 0)
+
+
+class CustomerCrudFlowTest(TestCase):
+    def setUp(self):
+        self.customer = Customer.objects.create(name="Ana", email="ana@example.com")
+
+    def test_create_customer(self):
+        url = reverse("first_app:customers")
+
+        response = self.client.post(
+            url,
+            {
+                "name": "Luis",
+                "email": "luis@example.com",
+            },
+        )
+
+        self.assertRedirects(response, url)
+        self.assertTrue(Customer.objects.filter(email="luis@example.com").exists())
+
+    def test_update_customer(self):
+        url = reverse("first_app:customer_edit", args=[self.customer.pk])
+
+        response = self.client.post(
+            url,
+            {
+                "name": "Ana Maria",
+                "email": "ana.maria@example.com",
+            },
+        )
+
+        self.assertRedirects(response, reverse("first_app:customers"))
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.name, "Ana Maria")
+        self.assertEqual(self.customer.email, "ana.maria@example.com")
+
+    def test_delete_customer_without_orders(self):
+        url = reverse("first_app:customer_delete", args=[self.customer.pk])
+
+        response = self.client.post(url)
+
+        self.assertRedirects(response, reverse("first_app:customers"))
+        self.assertFalse(Customer.objects.filter(pk=self.customer.pk).exists())
+
+    def test_cannot_delete_customer_with_orders(self):
+        Order.objects.create(customer=self.customer)
+        url = reverse("first_app:customer_delete", args=[self.customer.pk])
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Cannot delete this customer because it already has orders.",
+        )
+        self.assertTrue(Customer.objects.filter(pk=self.customer.pk).exists())
