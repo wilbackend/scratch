@@ -59,6 +59,15 @@
             align-items: start;
         }
 
+        .message-error {
+            margin: 0 0 1rem;
+            padding: 0.7rem 0.8rem;
+            border: 1px solid var(--danger-border);
+            border-radius: 10px;
+            color: var(--danger-text);
+            background: var(--danger-bg);
+        }
+
         .panel {
             background: var(--panel);
             border: 1px solid var(--border);
@@ -231,6 +240,10 @@
         <h1 class="page-title">Product Manager</h1>
         <p class="page-subtitle">Create, edit, and remove products from one page.</p>
         <p class="page-subtitle"><a href="{% url 'first_app:orders' %}">Go to orders</a></p>
+
+        {% if delete_error %}
+        <p class="message-error">{{ delete_error }}</p>
+        {% endif %}
 
         <div class="layout">
             <section class="panel create-panel">

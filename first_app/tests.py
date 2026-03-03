@@ -25,6 +25,30 @@ class ProductCreateTest(TestCase):
         self.assertEqual(str(product.price), "59.90")
         self.assertTrue(product.is_active)
 
+    def test_cannot_delete_product_with_order_items(self):
+        customer = Customer.objects.create(name="Ana", email="ana@example.com")
+        product = Product.objects.create(
+            name="Monitor",
+            price=Decimal("120.00"),
+            is_active=True,
+        )
+        order = Order.objects.create(customer=customer)
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=1,
+            unit_price=product.price,
+        )
+
+        response = self.client.post(reverse("first_app:product_delete", args=[product.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Cannot delete this product because it already appears in orders.",
+        )
+        self.assertTrue(Product.objects.filter(pk=product.pk).exists())
+
 
 class OrderCreateFlowTest(TestCase):
     def setUp(self):

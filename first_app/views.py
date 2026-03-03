@@ -83,8 +83,21 @@ def product_update(request, pk):
 @require_POST
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    product.delete()
-    return redirect("first_app:products")
+    try:
+        product.delete()
+        return redirect("first_app:products")
+    except ProtectedError:
+        form = ProductForm()
+        products = Product.objects.all()
+        return render(
+            request,
+            "first_app/products.html",
+            {
+                "form": form,
+                "products": products,
+                "delete_error": "Cannot delete this product because it already appears in orders.",
+            },
+        )
 
 def customer_list_create(request):
     if request.method == "POST":
