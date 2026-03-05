@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from .forms import OrderCreateForm, OrderItemFormSet, ProductForm, CustomerForm
+from .forms import CustomerForm, OrderCreateForm, OrderItemFormSet, ProductForm
 from .models import Order, OrderItem, Product, Customer
 from django.db.models.deletion import ProtectedError
 
@@ -60,6 +60,13 @@ def order_list_create(request):
             "orders": orders,
         },
     )
+
+
+@require_POST
+def order_delete(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    order.delete()
+    return redirect("first_app:orders")
 
 
 def product_update(request, pk):

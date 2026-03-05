@@ -129,6 +129,35 @@ class OrderCreateFlowTest(TestCase):
         self.assertEqual(Order.objects.count(), 0)
         self.assertEqual(OrderItem.objects.count(), 0)
 
+    def test_delete_order_removes_order_and_items(self):
+        order = Order.objects.create(customer=self.customer)
+        OrderItem.objects.create(
+            order=order,
+            product=self.product_one,
+            quantity=2,
+            unit_price=self.product_one.price,
+        )
+        OrderItem.objects.create(
+            order=order,
+            product=self.product_two,
+            quantity=1,
+            unit_price=self.product_two.price,
+        )
+
+        response = self.client.post(reverse("first_app:order_delete", args=[order.pk]))
+
+        self.assertRedirects(response, reverse("first_app:orders"))
+        self.assertFalse(Order.objects.filter(pk=order.pk).exists())
+        self.assertEqual(OrderItem.objects.filter(order_id=order.pk).count(), 0)
+
+    def test_order_delete_rejects_get(self):
+        order = Order.objects.create(customer=self.customer)
+
+        response = self.client.get(reverse("first_app:order_delete", args=[order.pk]))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Order.objects.filter(pk=order.pk).exists())
+
 
 class CustomerCrudFlowTest(TestCase):
     def setUp(self):

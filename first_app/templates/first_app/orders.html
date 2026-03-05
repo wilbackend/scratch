@@ -187,6 +187,28 @@
             font-weight: 700;
         }
 
+        .order-actions {
+            margin-top: 0.65rem;
+        }
+
+        .inline-form {
+            margin: 0;
+        }
+
+        .btn-delete {
+            border: 1px solid var(--danger-border);
+            border-radius: 8px;
+            padding: 0.4rem 0.62rem;
+            color: var(--danger-text);
+            background: var(--danger-bg);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: #ffe3e3;
+        }
+
         .empty-state {
             margin: 0;
             color: var(--muted);
@@ -261,6 +283,14 @@
                             {% endfor %}
                         </ul>
                         <p class="order-total">Total: ${{ order.total_amount }}</p>
+                        <div class="order-actions">
+                            <form class="inline-form" method="post"
+                                action="{% url 'first_app:order_delete' order.pk %}"
+                                onsubmit="return confirm('Delete order #{{ order.id }}?');">
+                                {% csrf_token %}
+                                <button class="btn-delete" type="submit">Delete Order</button>
+                            </form>
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>
