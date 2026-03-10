@@ -1,8 +1,11 @@
 from decimal import Decimal
+from io import StringIO
 
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
+from .management.commands.seed_sample_data import SAMPLE_CUSTOMERS, SAMPLE_PRODUCTS
 from .models import Customer, Order, OrderItem, Product
 
 
@@ -213,3 +216,25 @@ class CustomerCrudFlowTest(TestCase):
             "Cannot delete this customer because it already has orders.",
         )
         self.assertTrue(Customer.objects.filter(pk=self.customer.pk).exists())
+
+
+class SeedSampleDataCommandTest(TestCase):
+    def test_seed_sample_data_creates_catalog_and_orders(self):
+        output = StringIO()
+
+        call_command("seed_sample_data", orders=4, seed=7, stdout=output)
+
+        self.assertEqual(Customer.objects.count(), len(SAMPLE_CUSTOMERS))
+        self.assertEqual(Product.objects.count(), len(SAMPLE_PRODUCTS))
+        self.assertEqual(Order.objects.count(), 4)
+        self.assertGreaterEqual(OrderItem.objects.count(), 4)
+        self.assertFalse(OrderItem.objects.filter(product__is_active=False).exists())
+        self.assertIn("Sample data ready", output.getvalue())
+
+    def test_seed_sample_data_reuses_existing_catalog(self):
+        call_command("seed_sample_data", orders=2, seed=1)
+        call_command("seed_sample_data", orders=3, seed=2)
+
+        self.assertEqual(Customer.objects.count(), len(SAMPLE_CUSTOMERS))
+        self.assertEqual(Product.objects.count(), len(SAMPLE_PRODUCTS))
+        self.assertEqual(Order.objects.count(), 5)
