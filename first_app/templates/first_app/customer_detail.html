@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Detail</title>
+</head>
+
+<body>
+    <h1>{{ customer.name }}</h1>
+    <p>{{ customer.email }}</p>
+
+    <h2>Orders</h2>
+
+    {% if orders %}
+    <ul>
+        {% for order in orders %}
+        <li>
+            Order #{{ order.id}} -
+            {{ order.ordered_at|date:"Y-m-d H:i" }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>This customer has no orders yet.</p>
+    {% endif %}
+</body>
+
+</html>

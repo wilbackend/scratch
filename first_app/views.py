@@ -158,3 +158,16 @@ def customer_delete(request, pk):
                 "delete_error": "Cannot delete this customer because it already has orders.",
             },
         )
+
+def customer_detail(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    orders = customer.orders.order_by("-ordered_at", "-id")
+    return render(
+        request,
+        "first_app/customer_detail.html",
+        {
+            "customer": customer,
+            "orders": orders,
+        },
+    )
+
