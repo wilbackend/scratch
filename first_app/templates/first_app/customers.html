@@ -278,6 +278,7 @@
                         </div>
 
                         <div class="actions">
+                            <a class="link-edit" href="{% url 'first_app:customer_detail' customer.pk %}">View</a>
                             <a class="link-edit" href="{% url 'first_app:customer_edit' customer.pk %}">Edit</a>
                             <form class="inline-form" method="post"
                                 action="{% url 'first_app:customer_delete' customer.pk %}">
