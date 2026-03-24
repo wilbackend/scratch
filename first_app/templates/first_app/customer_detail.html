@@ -20,6 +20,7 @@
         <li>
             Order #{{ order.id}} -
             {{ order.ordered_at|date:"Y-m-d H:i" }}
+            <p>Total: ${{ order.total_amount }}</p>
         </li>
         {% endfor %}
     </ul>
