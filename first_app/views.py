@@ -161,7 +161,7 @@ def customer_delete(request, pk):
 
 def customer_detail(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
-    orders = customer.orders.order_by("-ordered_at", "-id")
+    orders = customer.orders.prefetch_related("items__product").order_by("-ordered_at", "-id")
     order_count = orders.count()
     return render(
         request,

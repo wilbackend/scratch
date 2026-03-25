@@ -21,6 +21,13 @@
             Order #{{ order.id}} -
             {{ order.ordered_at|date:"Y-m-d H:i" }}
             <p>Total: ${{ order.total_amount }}</p>
+
+            <ul>
+                {% for item in order.items.all %}
+                <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price}}</li>
+                {% endfor %}
+            </ul>
+
         </li>
         {% endfor %}
     </ul>
