@@ -24,7 +24,7 @@
 
             <ul>
                 {% for item in order.items.all %}
-                <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price}}</li>
+                <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price}} = ${{ item.line_total}}</li>
                 {% endfor %}
             </ul>
 
