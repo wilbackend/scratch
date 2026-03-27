@@ -22,11 +22,15 @@
             {{ order.ordered_at|date:"Y-m-d H:i" }}
             <p>Total: ${{ order.total_amount }}</p>
 
+            {% if order.items.all %}
             <ul>
                 {% for item in order.items.all %}
                 <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price}} = ${{ item.line_total}}</li>
                 {% endfor %}
             </ul>
+            {% else %}
+            <p>No items in this order yet.</p>
+            {% endif %}
 
         </li>
         {% endfor %}
