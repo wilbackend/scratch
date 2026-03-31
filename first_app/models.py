@@ -22,8 +22,23 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_PAID = "paid"
+    STATUS_CANCELLED = "cancelled"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_PAID, "Paid"),
+        (STATUS_CANCELLED, "Cancelled")
+    ]
+
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name="orders")
     ordered_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+    )
 
     def __str__(self):
         return f"Order #{self.id} - {self.customer}"
@@ -54,4 +69,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"Order #{self.order_id} - {self.product} x {self.quantity}"
- 
