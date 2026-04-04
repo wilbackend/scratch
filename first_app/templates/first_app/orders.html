@@ -277,15 +277,16 @@
                     <li class="order-card">
                         <h3>Order #{{ order.id }} - {{ order.customer }}</h3>
                         <p class="order-meta">{{ order.ordered_at|date:"Y-m-d H:i" }}</p>
+                        <p class="order-meta">Status: {{ order.status }}</p>
                         <ul class="order-items">
                             {% for item in order.items.all %}
-                            <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price }} = ${{ item.line_total }}</li>
+                            <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price }} = ${{
+                                item.line_total }}</li>
                             {% endfor %}
                         </ul>
                         <p class="order-total">Total: ${{ order.total_amount }}</p>
                         <div class="order-actions">
-                            <form class="inline-form" method="post"
-                                action="{% url 'first_app:order_delete' order.pk %}"
+                            <form class="inline-form" method="post" action="{% url 'first_app:order_delete' order.pk %}"
                                 onsubmit="return confirm('Delete order #{{ order.id }}?');">
                                 {% csrf_token %}
                                 <button class="btn-delete" type="submit">Delete Order</button>

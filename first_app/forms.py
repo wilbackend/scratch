@@ -11,7 +11,7 @@ class ProductForm(forms.ModelForm):
 class OrderCreateForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ["customer"]
+        fields = ["customer", "status"]
 
 
 class OrderItemInputForm(forms.Form):
@@ -59,3 +59,4 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ["name", "email"]
+

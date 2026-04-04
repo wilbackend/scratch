@@ -1,10 +1,8 @@
 from decimal import Decimal
 from io import StringIO
-
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
-
 from .management.commands.seed_sample_data import SAMPLE_CUSTOMERS, SAMPLE_PRODUCTS
 from .models import Customer, Order, OrderItem, Product
 
@@ -70,6 +68,7 @@ class OrderCreateFlowTest(TestCase):
     def _order_payload(self, rows):
         payload = {
             "order-customer": str(self.customer.pk),
+            "order-status": Order.STATUS_PENDING,
             "items-TOTAL_FORMS": "3",
             "items-INITIAL_FORMS": "0",
             "items-MIN_NUM_FORMS": "0",
@@ -114,6 +113,21 @@ class OrderCreateFlowTest(TestCase):
 
         self.assertEqual(first_item.unit_price, Decimal("19.99"))
 
+    def test_create_order_saves_selected_status(self):
+        url = reverse("first_app:orders")
+        payload = self._order_payload(
+            [
+                (self.product_one, 1),
+            ]
+        )
+        payload["order-status"] = Order.STATUS_PAID
+
+        response = self.client.post(url, payload)
+
+        self.assertRedirects(response, url)
+        order = Order.objects.get()
+        self.assertEqual(order.status, Order.STATUS_PAID)
+
     def test_rejects_duplicate_product_in_same_order(self):
         url = reverse("first_app:orders")
 
@@ -129,6 +143,16 @@ class OrderCreateFlowTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Each product can appear only once per order.")
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(OrderItem.objects.count(), 0)
+
+    def test_rejects_order_without_items(self):
+        url = reverse("first_app:orders")
+
+        response = self.client.post(url, self._order_payload([]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Add at least one item to create an order.")
         self.assertEqual(Order.objects.count(), 0)
         self.assertEqual(OrderItem.objects.count(), 0)
 
