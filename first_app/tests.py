@@ -198,11 +198,14 @@ class CustomerCrudFlowTest(TestCase):
             {
                 "name": "Luis",
                 "email": "luis@example.com",
+                "phone": "555-1111"
             },
         )
 
         self.assertRedirects(response, url)
         self.assertTrue(Customer.objects.filter(email="luis@example.com").exists())
+        customer = Customer.objects.get(email="luis@example.com")
+        self.assertEqual(customer.phone, "555-1111")
 
     def test_update_customer(self):
         url = reverse("first_app:customer_edit", args=[self.customer.pk])
@@ -212,6 +215,7 @@ class CustomerCrudFlowTest(TestCase):
             {
                 "name": "Ana Maria",
                 "email": "ana.maria@example.com",
+                "phone": "555-1111",
             },
         )
 
@@ -219,6 +223,7 @@ class CustomerCrudFlowTest(TestCase):
         self.customer.refresh_from_db()
         self.assertEqual(self.customer.name, "Ana Maria")
         self.assertEqual(self.customer.email, "ana.maria@example.com")
+        self.assertEqual(self.customer.phone, "555-1111")
 
     def test_delete_customer_without_orders(self):
         url = reverse("first_app:customer_delete", args=[self.customer.pk])

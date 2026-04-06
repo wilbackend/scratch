@@ -58,5 +58,6 @@ OrderItemFormSet = formset_factory(
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = ["name", "email"]
+        fields = ["name", "email", "phone"]
+
 
