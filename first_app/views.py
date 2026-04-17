@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .forms import CustomerForm, OrderCreateForm, OrderItemFormSet, ProductForm
@@ -115,11 +116,17 @@ def customer_list_create(request):
     else:
         form = CustomerForm()
 
+    search_term = request.GET.get("q", "").strip()
     customers = Customer.objects.order_by("name")
+    if search_term:
+        customers = customers.filter(
+            Q(name__icontains=search_term) | Q(phone__icontains=search_term)
+        )
+
     return render(
         request,
         "first_app/customers.html",
-        {"form": form, "customers": customers},
+        {"form": form, "customers": customers, "search_term": search_term},
     )
 
 def customer_update(request, pk):
@@ -172,4 +179,3 @@ def customer_detail(request, pk):
             "order_count": order_count,
         },
     )
-

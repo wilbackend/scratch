@@ -188,7 +188,11 @@ class OrderCreateFlowTest(TestCase):
 
 class CustomerCrudFlowTest(TestCase):
     def setUp(self):
-        self.customer = Customer.objects.create(name="Ana", email="ana@example.com")
+        self.customer = Customer.objects.create(
+            name="Ana",
+            email="ana@example.com",
+            phone="555-0000",
+        )
 
     def test_create_customer(self):
         url = reverse("first_app:customers")
@@ -245,6 +249,24 @@ class CustomerCrudFlowTest(TestCase):
             "Cannot delete this customer because it already has orders.",
         )
         self.assertTrue(Customer.objects.filter(pk=self.customer.pk).exists())
+
+    def test_search_customers_by_name(self):
+        luis = Customer.objects.create(name="Luis", email="luis@example.com", phone="555-2222")
+        Customer.objects.create(name="Maria", email="maria@example.com", phone="555-3333")
+
+        response = self.client.get(reverse("first_app:customers"), {"q": "lui"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["customers"]), [luis])
+        self.assertContains(response, 'value="lui"')
+
+    def test_search_customers_by_phone(self):
+        Customer.objects.create(name="Luis", email="luis@example.com", phone="555-2222")
+
+        response = self.client.get(reverse("first_app:customers"), {"q": "0000"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["customers"]), [self.customer])
 
 
 class SeedSampleDataCommandTest(TestCase):

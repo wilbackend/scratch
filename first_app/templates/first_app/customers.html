@@ -170,6 +170,18 @@
             gap: 0.65rem;
         }
 
+        .search-row {
+            display: flex;
+            gap: 0.55rem;
+            align-items: center;
+            margin: 0 0 1rem;
+        }
+
+        .search-row input[type="text"] {
+            margin: 0;
+            flex: 1;
+        }
+
         .customer-item {
             display: flex;
             justify-content: space-between;
@@ -267,6 +279,13 @@
 
             <section class="panel">
                 <h2>Customer List</h2>
+                <form class="search-row" method="get">
+                    <input type="text" name="q" placeholder="Search by name or phone" value="{{ search_term }}">
+                    <button class="btn-primary" type="submit">Search</button>
+                    {% if search_term %}
+                    <a class="link-cancel" href="{% url 'first_app:customers' %}">Clear</a>
+                    {% endif %}
+                </form>
                 {% if customers %}
                 <ul class="customer-list">
                     {% for customer in customers %}
@@ -291,7 +310,13 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                <p class="empty-state">No customers yet.</p>
+                <p class="empty-state">
+                    {% if search_term %}
+                    No customers matched "{{ search_term }}".
+                    {% else %}
+                    No customers yet.
+                    {% endif %}
+                </p>
                 {% endif %}
             </section>
         </div>
