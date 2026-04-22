@@ -268,6 +268,14 @@ class CustomerCrudFlowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["customers"]), [self.customer])
 
+    def test_search_customers_by_email(self):
+        luis = Customer.objects.create(name="Luis", email="luis@example.com", phone="555-2222")
+
+        response = self.client.get(reverse("first_app:customers"), {"q": "luis@"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["customers"]), [luis])
+
 
 class SeedSampleDataCommandTest(TestCase):
     def test_seed_sample_data_creates_catalog_and_orders(self):

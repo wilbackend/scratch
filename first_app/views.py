@@ -120,7 +120,9 @@ def customer_list_create(request):
     customers = Customer.objects.order_by("name")
     if search_term:
         customers = customers.filter(
-            Q(name__icontains=search_term) | Q(phone__icontains=search_term)
+            Q(name__icontains=search_term)
+            | Q(email__icontains=search_term)
+            | Q(phone__icontains=search_term)
         )
 
     return render(

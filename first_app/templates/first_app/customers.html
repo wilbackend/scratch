@@ -280,7 +280,7 @@
             <section class="panel">
                 <h2>Customer List</h2>
                 <form class="search-row" method="get">
-                    <input type="text" name="q" placeholder="Search by name or phone" value="{{ search_term }}">
+                    <input type="text" name="q" placeholder="Search by name, email, or phone" value="{{ search_term }}">
                     <button class="btn-primary" type="submit">Search</button>
                     {% if search_term %}
                     <a class="link-cancel" href="{% url 'first_app:customers' %}">Clear</a>
