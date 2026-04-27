@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,6 +18,28 @@ def product_list_create(request):
 
     products = Product.objects.all()
     return render(request, "first_app/products.html", {"form": form, "products": products})
+
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    order_items = product.order_items.select_related("order__customer").order_by(
+        "-order__ordered_at",
+        "-order_id",
+    )
+    order_count = order_items.count()
+    total_quantity_sold = sum((item.quantity for item in order_items), 0)
+    total_revenue = sum((item.line_total for item in order_items), Decimal("0.00"))
+    return render(
+        request,
+        "first_app/product_detail.html",
+        {
+            "product": product,
+            "order_items": order_items,
+            "order_count": order_count,
+            "total_quantity_sold": total_quantity_sold,
+            "total_revenue": total_revenue,
+        },
+    )
 
 
 def order_list_create(request):

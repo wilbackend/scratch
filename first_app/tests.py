@@ -51,6 +51,40 @@ class ProductCreateTest(TestCase):
         self.assertTrue(Product.objects.filter(pk=product.pk).exists())
 
 
+class ProductDetailViewTest(TestCase):
+    def test_product_detail_shows_sales_summary_and_order_history(self):
+        customer = Customer.objects.create(name="Ana", email="ana@example.com")
+        product = Product.objects.create(name="Monitor", price=Decimal("120.00"), is_active=True)
+        order = Order.objects.create(customer=customer, status=Order.STATUS_PAID)
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=2,
+            unit_price=Decimal("120.00"),
+        )
+
+        response = self.client.get(reverse("first_app:product_detail", args=[product.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["order_count"], 1)
+        self.assertEqual(response.context["total_quantity_sold"], 2)
+        self.assertEqual(response.context["total_revenue"], Decimal("240.00"))
+        self.assertContains(response, "Monitor")
+        self.assertContains(response, "Ana")
+        self.assertContains(response, "paid")
+
+    def test_product_detail_shows_empty_state_when_product_has_no_orders(self):
+        product = Product.objects.create(name="Desk Lamp", price=Decimal("20.00"), is_active=False)
+
+        response = self.client.get(reverse("first_app:product_detail", args=[product.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["order_count"], 0)
+        self.assertEqual(response.context["total_quantity_sold"], 0)
+        self.assertEqual(response.context["total_revenue"], Decimal("0.00"))
+        self.assertContains(response, "This product has not been ordered yet.")
+
+
 class OrderCreateFlowTest(TestCase):
     def setUp(self):
         self.customer = Customer.objects.create(name="Ana", email="ana@example.com")

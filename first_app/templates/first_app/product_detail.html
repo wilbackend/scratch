@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail</title>
+</head>
+
+<body>
+    <p><a href="{% url 'first_app:products' %}">Back to products</a></p>
+
+    <h1>{{ product.name }}</h1>
+    <p>Current price: ${{ product.price }}</p>
+    <p>Status: {% if product.is_active %}Active{% else %}Inactive{% endif %}</p>
+    <p>Orders containing this product: {{ order_count }}</p>
+    <p>Total quantity sold: {{ total_quantity_sold }}</p>
+    <p>Total revenue: ${{ total_revenue }}</p>
+
+    <h2>Order History</h2>
+
+    {% if order_items %}
+    <ul>
+        {% for item in order_items %}
+        <li>
+            Order #{{ item.order.id }} -
+            {{ item.order.customer.name }} -
+            {{ item.order.ordered_at|date:"Y-m-d H:i" }}
+            <p>Status: {{ item.order.status }}</p>
+            <p>Quantity: {{ item.quantity }}</p>
+            <p>Unit price: ${{ item.unit_price }}</p>
+            <p>Line total: ${{ item.line_total }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>This product has not been ordered yet.</p>
+    {% endif %}
+</body>
+
+</html>
