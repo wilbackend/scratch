@@ -193,8 +193,26 @@ def customer_delete(request, pk):
 
 def customer_detail(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
-    orders = customer.orders.prefetch_related("items__product").order_by("-ordered_at", "-id")
-    order_count = orders.count()
+    orders = list(
+        customer.orders.prefetch_related("items__product").order_by("-ordered_at", "-id")
+    )
+    order_count = len(orders)
+    total_spent = sum((order.total_amount for order in orders), Decimal("0.00"))
+    total_items = sum(
+        (item.quantity for order in orders for item in order.items.all()),
+        0,
+    )
+    average_order_value = (
+        total_spent / order_count if order_count else Decimal("0.00")
+    ).quantize(Decimal("0.01"))
+    status_summary = [
+        {
+            "status": status,
+            "label": label,
+            "count": sum(1 for order in orders if order.status == status),
+        }
+        for status, label in Order.STATUS_CHOICES
+    ]
     return render(
         request,
         "first_app/customer_detail.html",
@@ -202,5 +220,9 @@ def customer_detail(request, pk):
             "customer": customer,
             "orders": orders,
             "order_count": order_count,
+            "total_spent": total_spent,
+            "total_items": total_items,
+            "average_order_value": average_order_value,
+            "status_summary": status_summary,
         },
     )

@@ -6,6 +6,7 @@ A Django practice project for learning how forms, views, models, and the SQLite 
 
 - Product create, list, update, and delete
 - Customer create, list, update, and delete
+- Customer detail page with purchase totals and order-status summary
 - Order create with multiple order items
 - Order delete with cascading order-item removal
 - Protected deletes for customers and products already used by orders

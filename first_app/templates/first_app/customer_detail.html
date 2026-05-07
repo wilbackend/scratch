@@ -5,40 +5,388 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Detail</title>
+    <style>
+        :root {
+            --bg-main: #edf3fa;
+            --bg-accent: #d9e6f7;
+            --panel: #ffffff;
+            --ink: #1f2937;
+            --muted: #5b6878;
+            --border: #d2dbe8;
+            --primary: #1e4fa8;
+            --primary-hover: #173f85;
+            --success-bg: #e8f7ee;
+            --success-text: #20613c;
+            --warning-bg: #fbe8bf;
+            --warning-text: #7a5900;
+            --danger-bg: #fff1f1;
+            --danger-text: #9d2b2b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
+            background:
+                radial-gradient(circle at 10% 10%, var(--bg-accent), transparent 45%),
+                radial-gradient(circle at 90% 5%, #e6f2ff, transparent 35%),
+                var(--bg-main);
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 1.8rem auto;
+            padding: 0 1rem 1.5rem;
+        }
+
+        .top-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 0 0 1rem;
+        }
+
+        .top-links a,
+        .link-primary {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .top-links a:hover,
+        .link-primary:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+            margin: 0 0 1rem;
+        }
+
+        .page-title {
+            margin: 0 0 0.35rem;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        .page-subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .panel,
+        .summary-card,
+        .order-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px rgba(34, 55, 92, 0.08);
+            animation: rise 240ms ease-out both;
+        }
+
+        .panel {
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8rem;
+            margin: 0 0 1rem;
+        }
+
+        .summary-card {
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .summary-label,
+        .meta-label {
+            margin: 0 0 0.35rem;
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .detail-layout {
+            display: grid;
+            grid-template-columns: minmax(260px, 320px) 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        h2 {
+            margin: 0 0 0.9rem;
+            font-size: 1.05rem;
+        }
+
+        .status-heading {
+            margin-top: 1.2rem;
+        }
+
+        .contact-list,
+        .status-list,
+        .order-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .contact-list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .contact-value {
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .status-list {
+            display: grid;
+            gap: 0.55rem;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.6rem 0.7rem;
+            background: #fdfefe;
+        }
+
+        .status-count {
+            min-width: 2rem;
+            border-radius: 999px;
+            padding: 0.18rem 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary);
+            background: #edf4ff;
+        }
+
+        .order-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .line-list {
+            margin-top: 0.55rem;
+        }
+
+        .order-card {
+            border-radius: 10px;
+            padding: 0.8rem;
+            background: #fdfefe;
+        }
+
+        .order-card h3 {
+            margin: 0 0 0.45rem;
+            font-size: 1rem;
+        }
+
+        .order-meta,
+        .line-detail {
+            margin: 0.25rem 0 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .line-total {
+            margin: 0.45rem 0 0;
+            font-weight: 700;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 0.25rem 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-paid {
+            color: var(--success-text);
+            background: var(--success-bg);
+        }
+
+        .badge-pending {
+            color: var(--warning-text);
+            background: var(--warning-bg);
+        }
+
+        .badge-cancelled {
+            color: var(--danger-text);
+            background: var(--danger-bg);
+        }
+
+        .empty-state {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        @media (max-width: 860px) {
+            .page-header,
+            .detail-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>{{ customer.name }}</h1>
-    <p>{{ customer.email }}</p>
-    <p>Total orders: {{ order_count }}</p>
+    <main class="container">
+        <p class="top-links">
+            <a href="{% url 'first_app:customers' %}">Back to customers</a>
+            <a href="{% url 'first_app:orders' %}">Orders</a>
+            <a href="{% url 'first_app:products' %}">Products</a>
+        </p>
 
-    <h2>Orders</h2>
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">{{ customer.name }}</h1>
+                <p class="page-subtitle">Customer order summary and purchase history.</p>
+            </div>
+        </header>
 
-    {% if orders %}
-    <ul>
-        {% for order in orders %}
-        <li>
-            Order #{{ order.id}} -
-            {{ order.ordered_at|date:"Y-m-d H:i" }}
-            <p>Status: {{ order.status }}</p>
-            <p>Total: ${{ order.total_amount }}</p>
+        <section class="summary-grid" aria-label="Customer summary">
+            <div class="summary-card">
+                <p class="summary-label">Orders</p>
+                <p class="summary-value">{{ order_count }}</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Total spent</p>
+                <p class="summary-value">${{ total_spent }}</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Items bought</p>
+                <p class="summary-value">{{ total_items }}</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Average order</p>
+                <p class="summary-value">${{ average_order_value }}</p>
+            </div>
+        </section>
 
-            {% if order.items.all %}
-            <ul>
-                {% for item in order.items.all %}
-                <li>{{ item.product.name }} x {{ item.quantity }} @ ${{ item.unit_price}} = ${{ item.line_total}}</li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p>No items in this order yet.</p>
-            {% endif %}
+        <div class="detail-layout">
+            <aside class="panel">
+                <h2>Customer Info</h2>
+                <ul class="contact-list">
+                    <li>
+                        <p class="meta-label">Email</p>
+                        <p class="contact-value">{{ customer.email }}</p>
+                    </li>
+                    <li>
+                        <p class="meta-label">Phone</p>
+                        <p class="contact-value">
+                            {% if customer.phone %}{{ customer.phone }}{% else %}Not provided{% endif %}
+                        </p>
+                    </li>
+                    <li>
+                        <p class="meta-label">Created</p>
+                        <p class="contact-value">{{ customer.created_at|date:"Y-m-d H:i" }}</p>
+                    </li>
+                </ul>
 
-        </li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>This customer has no orders yet.</p>
-    {% endif %}
+                <h2 class="status-heading">Order Status</h2>
+                <ul class="status-list">
+                    {% for item in status_summary %}
+                    <li class="status-item">
+                        <span>{{ item.label }}</span>
+                        <span class="status-count">{{ item.count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+
+            <section class="panel">
+                <h2>Order History</h2>
+
+                {% if orders %}
+                <ul class="order-list">
+                    {% for order in orders %}
+                    <li class="order-card">
+                        <h3>Order #{{ order.id }}</h3>
+                        <p class="order-meta">{{ order.ordered_at|date:"Y-m-d H:i" }}</p>
+                        <p class="order-meta">
+                            Status:
+                            <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </p>
+
+                        {% if order.items.all %}
+                        <ul class="order-list line-list">
+                            {% for item in order.items.all %}
+                            <li>
+                                <p class="line-detail">
+                                    <a class="link-primary" href="{% url 'first_app:product_detail' item.product.pk %}">
+                                        {{ item.product.name }}
+                                    </a>
+                                    x {{ item.quantity }} @ ${{ item.unit_price }}
+                                </p>
+                                <p class="line-total">Line total: ${{ item.line_total }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="empty-state">No items in this order yet.</p>
+                        {% endif %}
+
+                        <p class="line-total">Order total: ${{ order.total_amount }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="empty-state">This customer has no orders yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </main>
 </body>
 
 </html>

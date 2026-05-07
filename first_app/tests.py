@@ -310,6 +310,73 @@ class CustomerCrudFlowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["customers"]), [luis])
 
+    def test_customer_detail_shows_purchase_summary_and_status_counts(self):
+        monitor = Product.objects.create(
+            name="Monitor",
+            price=Decimal("20.00"),
+            is_active=True,
+        )
+        cable = Product.objects.create(
+            name="USB Cable",
+            price=Decimal("5.00"),
+            is_active=True,
+        )
+        paid_order = Order.objects.create(
+            customer=self.customer,
+            status=Order.STATUS_PAID,
+        )
+        pending_order = Order.objects.create(
+            customer=self.customer,
+            status=Order.STATUS_PENDING,
+        )
+        OrderItem.objects.create(
+            order=paid_order,
+            product=monitor,
+            quantity=2,
+            unit_price=Decimal("20.00"),
+        )
+        OrderItem.objects.create(
+            order=paid_order,
+            product=cable,
+            quantity=1,
+            unit_price=Decimal("5.00"),
+        )
+        OrderItem.objects.create(
+            order=pending_order,
+            product=cable,
+            quantity=3,
+            unit_price=Decimal("5.00"),
+        )
+
+        response = self.client.get(reverse("first_app:customer_detail", args=[self.customer.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["order_count"], 2)
+        self.assertEqual(response.context["total_spent"], Decimal("60.00"))
+        self.assertEqual(response.context["total_items"], 6)
+        self.assertEqual(response.context["average_order_value"], Decimal("30.00"))
+
+        status_counts = {
+            item["status"]: item["count"] for item in response.context["status_summary"]
+        }
+        self.assertEqual(status_counts[Order.STATUS_PAID], 1)
+        self.assertEqual(status_counts[Order.STATUS_PENDING], 1)
+        self.assertEqual(status_counts[Order.STATUS_CANCELLED], 0)
+        self.assertContains(response, "Total spent")
+        self.assertContains(response, "$60.00")
+        self.assertContains(response, "Monitor")
+        self.assertContains(response, "USB Cable")
+
+    def test_customer_detail_empty_summary_defaults_to_zero(self):
+        response = self.client.get(reverse("first_app:customer_detail", args=[self.customer.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["order_count"], 0)
+        self.assertEqual(response.context["total_spent"], Decimal("0.00"))
+        self.assertEqual(response.context["total_items"], 0)
+        self.assertEqual(response.context["average_order_value"], Decimal("0.00"))
+        self.assertContains(response, "This customer has no orders yet.")
+
 
 class SeedSampleDataCommandTest(TestCase):
     def test_seed_sample_data_creates_catalog_and_orders(self):
