@@ -52,6 +52,19 @@
             font-size: 0.95rem;
         }
 
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 0 0 1rem;
+        }
+
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
         .layout {
             display: grid;
             grid-template-columns: minmax(260px, 340px) 1fr;
@@ -239,7 +252,11 @@
     <main class="container">
         <h1 class="page-title">Product Manager</h1>
         <p class="page-subtitle">Create, edit, and remove products from one page.</p>
-        <p class="page-subtitle"><a href="{% url 'first_app:orders' %}">Go to orders</a></p>
+        <p class="nav-links">
+            <a href="{% url 'first_app:dashboard' %}">Dashboard</a>
+            <a href="{% url 'first_app:customers' %}">Customers</a>
+            <a href="{% url 'first_app:orders' %}">Orders</a>
+        </p>
 
         {% if delete_error %}
         <p class="message-error">{{ delete_error }}</p>

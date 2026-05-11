@@ -7,6 +7,7 @@ A Django practice project for learning how forms, views, models, and the SQLite 
 - Product create, list, update, and delete
 - Customer create, list, update, and delete
 - Customer detail page with purchase totals and order-status summary
+- Dashboard page with sales totals, recent orders, and top products
 - Order create with multiple order items
 - Order delete with cascading order-item removal
 - Protected deletes for customers and products already used by orders
@@ -23,7 +24,7 @@ A Django practice project for learning how forms, views, models, and the SQLite 
 
 - `first_app/models.py`: `Customer`, `Product`, `Order`, `OrderItem`
 - `first_app/forms.py`: `ProductForm`, `CustomerForm`, `OrderCreateForm`, `OrderItemFormSet`
-- `first_app/views.py`: create, list, update, and delete flows
+- `first_app/views.py`: dashboard plus create, list, update, and delete flows
 - `first_app/urls.py`: app routes
 - `first_app/templates/first_app/`: product, customer, and order templates
 - `first_app/management/commands/seed_sample_data.py`: sample data generator

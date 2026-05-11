@@ -7,6 +7,89 @@ from .management.commands.seed_sample_data import SAMPLE_CUSTOMERS, SAMPLE_PRODU
 from .models import Customer, Order, OrderItem, Product
 
 
+class DashboardViewTest(TestCase):
+    def test_dashboard_shows_database_summary(self):
+        ana = Customer.objects.create(name="Ana", email="ana@example.com")
+        luis = Customer.objects.create(name="Luis", email="luis@example.com")
+        monitor = Product.objects.create(
+            name="Monitor",
+            price=Decimal("20.00"),
+            is_active=True,
+        )
+        cable = Product.objects.create(
+            name="USB Cable",
+            price=Decimal("5.00"),
+            is_active=True,
+        )
+        Product.objects.create(
+            name="Legacy Cable",
+            price=Decimal("3.00"),
+            is_active=False,
+        )
+        paid_order = Order.objects.create(customer=ana, status=Order.STATUS_PAID)
+        pending_order = Order.objects.create(customer=luis, status=Order.STATUS_PENDING)
+        Order.objects.create(customer=ana, status=Order.STATUS_CANCELLED)
+        OrderItem.objects.create(
+            order=paid_order,
+            product=monitor,
+            quantity=2,
+            unit_price=Decimal("20.00"),
+        )
+        OrderItem.objects.create(
+            order=paid_order,
+            product=cable,
+            quantity=1,
+            unit_price=Decimal("5.00"),
+        )
+        OrderItem.objects.create(
+            order=pending_order,
+            product=cable,
+            quantity=4,
+            unit_price=Decimal("5.00"),
+        )
+
+        response = self.client.get(reverse("first_app:home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_customers"], 2)
+        self.assertEqual(response.context["total_products"], 3)
+        self.assertEqual(response.context["active_products"], 2)
+        self.assertEqual(response.context["total_orders"], 3)
+        self.assertEqual(response.context["total_items"], 7)
+        self.assertEqual(response.context["total_revenue"], Decimal("65.00"))
+        self.assertEqual(response.context["average_order_value"], Decimal("21.67"))
+
+        status_counts = {
+            item["status"]: item["count"] for item in response.context["status_summary"]
+        }
+        self.assertEqual(status_counts[Order.STATUS_PAID], 1)
+        self.assertEqual(status_counts[Order.STATUS_PENDING], 1)
+        self.assertEqual(status_counts[Order.STATUS_CANCELLED], 1)
+
+        top_products = list(response.context["top_products"])
+        self.assertEqual(top_products[0]["product_name"], "Monitor")
+        self.assertEqual(top_products[0]["quantity_sold"], 2)
+        self.assertEqual(top_products[0]["revenue"], Decimal("40"))
+        self.assertContains(response, "Sales Dashboard")
+        self.assertContains(response, "$65.00")
+        self.assertContains(response, "Ana")
+        self.assertContains(response, "USB Cable")
+
+    def test_dashboard_empty_state_defaults_to_zero(self):
+        response = self.client.get(reverse("first_app:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_customers"], 0)
+        self.assertEqual(response.context["total_products"], 0)
+        self.assertEqual(response.context["active_products"], 0)
+        self.assertEqual(response.context["total_orders"], 0)
+        self.assertEqual(response.context["total_items"], 0)
+        self.assertEqual(response.context["total_revenue"], Decimal("0.00"))
+        self.assertEqual(response.context["average_order_value"], Decimal("0.00"))
+        self.assertContains(response, "No orders yet.")
+        self.assertContains(response, "No product sales yet.")
+
+
 class ProductCreateTest(TestCase):
     def test_create_product_with_valid_data(self):
         url = reverse("first_app:products")

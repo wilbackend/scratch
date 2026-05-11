@@ -4,6 +4,7 @@ from .views import (
     customer_delete,
     customer_list_create,
     customer_update,
+    dashboard,
     product_detail,
     order_delete,
     order_list_create,
@@ -16,7 +17,8 @@ from .views import (
 app_name = "first_app"
 
 urlpatterns = [
-    path("", product_list_create, name="home"),
+    path("", dashboard, name="home"),
+    path("dashboard/", dashboard, name="dashboard"),
     path("products/", product_list_create, name="products"),
     path("products/<int:pk>/", product_detail, name="product_detail"),
     path("products/<int:pk>/edit/", product_update, name="product_edit"),

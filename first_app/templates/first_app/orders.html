@@ -230,7 +230,11 @@
     <main class="container">
         <h1 class="page-title">Order Manager</h1>
         <p class="page-subtitle">Create orders with multiple items and review totals.</p>
-        <p class="top-links"><a href="{% url 'first_app:products' %}">Back to products</a></p>
+        <p class="top-links">
+            <a href="{% url 'first_app:dashboard' %}">Dashboard</a>
+            <a href="{% url 'first_app:products' %}">Products</a>
+            <a href="{% url 'first_app:customers' %}">Customers</a>
+        </p>
 
         <div class="layout">
             <section class="panel">

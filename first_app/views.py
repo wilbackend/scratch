@@ -1,11 +1,68 @@
 from decimal import Decimal
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import DecimalField, ExpressionWrapper, F, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .forms import CustomerForm, OrderCreateForm, OrderItemFormSet, ProductForm
 from .models import Order, OrderItem, Product, Customer
 from django.db.models.deletion import ProtectedError
+
+
+def dashboard(request):
+    line_total = ExpressionWrapper(
+        F("quantity") * F("unit_price"),
+        output_field=DecimalField(max_digits=12, decimal_places=2),
+    )
+    item_summary = OrderItem.objects.aggregate(
+        total_revenue=Sum(line_total),
+        total_items=Sum("quantity"),
+    )
+    total_orders = Order.objects.count()
+    total_revenue = (item_summary["total_revenue"] or Decimal("0.00")).quantize(
+        Decimal("0.01")
+    )
+    average_order_value = (
+        total_revenue / total_orders if total_orders else Decimal("0.00")
+    ).quantize(Decimal("0.01"))
+    status_summary = [
+        {
+            "status": status,
+            "label": label,
+            "count": Order.objects.filter(status=status).count(),
+        }
+        for status, label in Order.STATUS_CHOICES
+    ]
+    top_products = (
+        OrderItem.objects.values("product_id", product_name=F("product__name"))
+        .annotate(
+            quantity_sold=Sum("quantity"),
+            revenue=Sum(line_total),
+        )
+        .order_by("-revenue", "product__name")[:5]
+    )
+    recent_orders = (
+        Order.objects.select_related("customer")
+        .prefetch_related("items__product")
+        .order_by("-ordered_at", "-id")[:5]
+    )
+
+    return render(
+        request,
+        "first_app/dashboard.html",
+        {
+            "total_customers": Customer.objects.count(),
+            "total_products": Product.objects.count(),
+            "active_products": Product.objects.filter(is_active=True).count(),
+            "total_orders": total_orders,
+            "total_revenue": total_revenue,
+            "total_items": item_summary["total_items"] or 0,
+            "average_order_value": average_order_value,
+            "status_summary": status_summary,
+            "top_products": top_products,
+            "recent_orders": recent_orders,
+        },
+    )
+
 
 def product_list_create(request):
     if request.method == "POST":
